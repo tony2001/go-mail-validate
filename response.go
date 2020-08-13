@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-mail-validate/validate"
+	"github.com/tony2001/go-mail-validate/validate"
 )
 
 type Response struct {

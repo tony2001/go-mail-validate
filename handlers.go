@@ -9,8 +9,8 @@ import (
 	"net/http"
 	//"go-mail-validate/config"
 
-	"go-mail-validate/log"
-	"go-mail-validate/validate"
+	"github.com/tony2001/go-mail-validate/log"
+	"github.com/tony2001/go-mail-validate/validate"
 )
 
 const RequestBodySizeLimit = 1024
@@ -59,17 +59,9 @@ func handleEmailValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results := validate.Validate(reqEmail.Email)
+	fsm := &validate.ValidateFSM{}
 
-	totalWeight := 0
-	for _, result := range results {
-		totalWeight += result.Weight
-	}
-
-	valid := false
-	if totalWeight > 0 {
-		valid = true
-	}
+	valid, results := fsm.Validate(reqEmail.Email)
 
 	response := NewResponse(valid, results)
 	sendJsonResponse(w, response)

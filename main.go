@@ -7,13 +7,14 @@ import (
 	"net/http"
 	"os"
 
-	"go-mail-validate/config"
-	"go-mail-validate/log"
+	"github.com/tony2001/go-mail-validate/config"
+	"github.com/tony2001/go-mail-validate/log"
 )
 
 const _defaultPort = "8080"
 
 var smtpTimeoutMsec int
+var clearoutTimeoutMsec int
 var debugMode bool
 
 type endPointT struct {
@@ -36,6 +37,7 @@ func main() {
 
 	flag.BoolVar(&debugMode, "d", false, "enable debug logging")
 	flag.IntVar(&smtpTimeoutMsec, "s", 1000, "SMTP timeout in milliseconds")
+	flag.IntVar(&clearoutTimeoutMsec, "c", 1000, "Clearout API timeout in milliseconds")
 	flag.Parse()
 
 	//check env var PORT
@@ -45,13 +47,21 @@ func main() {
 		portStr = _defaultPort
 	}
 
+	//Clearout API token
+	cTokenStr := os.Getenv("CLEAROUT_TOKEN")
+
 	var err error
 	var logLevel = log.Info
 	if debugMode {
 		logLevel = log.Debug
 	}
 
-	err = config.NewConfig(portStr, config.LogLevel(logLevel), config.SmtpTimeout(smtpTimeoutMsec))
+	err = config.NewConfig(portStr,
+		config.LogLevel(logLevel),
+		config.SmtpTimeout(smtpTimeoutMsec),
+		config.ClearoutToken(cTokenStr),
+		config.ClearoutTimeout(clearoutTimeoutMsec),
+	)
 	if err != nil {
 		syslog.Fatalf("failed to create config: %s", err)
 	}

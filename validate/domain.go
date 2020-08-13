@@ -1,10 +1,7 @@
 package validate
 
 import (
-	"fmt"
 	"strings"
-
-	"golang.org/x/net/publicsuffix"
 )
 
 var testDomains = map[string]bool{
@@ -32,18 +29,4 @@ func domainIsReserved(domainStr string) bool {
 	domainStr = stripSubdomains(domainStr, 1)
 	_, ok := testDomains[domainStr]
 	return ok
-}
-
-func domainIsManaged(domainStr string) error {
-	eTLD, icann := publicsuffix.PublicSuffix(domainStr)
-
-	if icann {
-		//ICANN managed domain
-		return nil
-	} else if strings.IndexByte(eTLD, '.') >= 0 {
-		//privately managed
-		return nil
-	}
-	//no such domain
-	return fmt.Errorf("such domain probably doesn't exist: %s", domainStr)
 }

@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"strconv"
 
-	"go-mail-validate/log"
+	"github.com/tony2001/go-mail-validate/log"
 )
 
 const defaultSmtpTimeoutMsec = 1000
+const defaultClearoutTimeoutMsec = 1000
 
 type Config struct {
-	port            int
-	logLevel        log.LogLevelT
-	smtpTimeoutMsec int
+	port                int
+	logLevel            log.LogLevelT
+	smtpTimeoutMsec     int
+	clearoutTimeoutMsec int
+	clearoutToken       string
 }
 
 var gConfig *Config
@@ -41,9 +44,10 @@ func NewConfig(portStr string, options ...func(*Config) error) error {
 	}
 
 	gConfig = &Config{
-		port:            port,
-		logLevel:        log.Info,
-		smtpTimeoutMsec: defaultSmtpTimeoutMsec,
+		port:                port,
+		logLevel:            log.Info,
+		smtpTimeoutMsec:     defaultSmtpTimeoutMsec,
+		clearoutTimeoutMsec: defaultClearoutTimeoutMsec,
 	}
 
 	for _, option := range options {
@@ -73,6 +77,23 @@ func SmtpTimeout(smtpTimeout int) func(*Config) error {
 	}
 }
 
+func ClearoutTimeout(clearoutTimeout int) func(*Config) error {
+	return func(c *Config) error {
+		if clearoutTimeout <= 0 {
+			return fmt.Errorf("Clearout timeout must be greater than 0")
+		}
+		gConfig.clearoutTimeoutMsec = clearoutTimeout
+		return nil
+	}
+}
+
+func ClearoutToken(cTokenStr string) func(*Config) error {
+	return func(c *Config) error {
+		gConfig.clearoutToken = cTokenStr
+		return nil
+	}
+}
+
 func GetPort() int {
 	return gConfig.port
 }
@@ -85,6 +106,14 @@ func GetSmtpTimeout() int {
 	return gConfig.smtpTimeoutMsec
 }
 
+func GetClearoutTimeout() int {
+	return gConfig.clearoutTimeoutMsec
+}
+
+func GetClearoutToken() string {
+	return gConfig.clearoutToken
+}
+
 func String() string {
-	return fmt.Sprintf("port: %d, logLevel: %s, smtpTimeout: %dms", gConfig.port, log.GetLogLevelStr(gConfig.logLevel), gConfig.smtpTimeoutMsec)
+	return fmt.Sprintf("port: %d, logLevel: %s, smtpTimeout: %dms, clearoutToken: %s", gConfig.port, log.GetLogLevelStr(gConfig.logLevel), gConfig.smtpTimeoutMsec, gConfig.clearoutToken)
 }
