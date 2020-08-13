@@ -115,5 +115,5 @@ func GetClearoutToken() string {
 }
 
 func String() string {
-	return fmt.Sprintf("port: %d, logLevel: %s, smtpTimeout: %dms, clearoutToken: %s", gConfig.port, log.GetLogLevelStr(gConfig.logLevel), gConfig.smtpTimeoutMsec, gConfig.clearoutToken)
+	return fmt.Sprintf("port: %d, logLevel: %s, smtpTimeout: %dms, clearoutTimeout: %dms, clearoutToken: %s", gConfig.port, log.GetLogLevelStr(gConfig.logLevel), gConfig.smtpTimeoutMsec, gConfig.clearoutTimeoutMsec, gConfig.clearoutToken)
 }
