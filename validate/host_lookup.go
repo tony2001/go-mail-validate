@@ -1,17 +1,18 @@
 package validate
 
 import (
+	"context"
 	"fmt"
 	"net"
 )
 
-func lookupDomain(domainStr string) (string, error) {
-	mx, err := net.LookupMX(domainStr)
+func lookupDomain(ctx context.Context, domainStr string) (string, error) {
+	mx, err := net.DefaultResolver.LookupMX(ctx, domainStr)
 	if err == nil {
 		return mx[0].Host, nil
 	}
 
-	ips, err := net.LookupIP(domainStr)
+	ips, err := net.DefaultResolver.LookupIPAddr(ctx, domainStr)
 	if err == nil {
 		return ips[0].String(), nil
 	}

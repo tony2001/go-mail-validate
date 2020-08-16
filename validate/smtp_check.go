@@ -1,6 +1,7 @@
 package validate
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/smtp"
@@ -11,12 +12,13 @@ import (
 	"github.com/tony2001/go-mail-validate/log"
 )
 
-func trySmtp(hostStr string, localStr string, domainStr string, strictCheck bool) (bool, error) {
+func trySmtp(ctx context.Context, hostStr string, localStr string, domainStr string, strictCheck bool) (bool, error) {
 	host := fmt.Sprintf("%s:%d", hostStr, 25)
 	log.Debugf("trying to connect to %s", host)
 
 	smtpTimeout := time.Duration(config.GetSmtpTimeout()) * time.Millisecond
-	conn, err := net.DialTimeout("tcp", host, smtpTimeout)
+	dialer := net.Dialer{Timeout: smtpTimeout}
+	conn, err := dialer.DialContext(ctx, "tcp", host)
 	if err != nil {
 		return false, err
 	}

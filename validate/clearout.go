@@ -2,6 +2,7 @@ package validate
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/tony2001/go-mail-validate/config"
@@ -41,7 +42,7 @@ func ClearoutEnabled() bool {
 	return false
 }
 
-func ClearoutInstantCheck(emailStr string) (requestSuccess bool, valid bool, err error) {
+func ClearoutInstantCheck(ctx context.Context, emailStr string) (requestSuccess bool, valid bool, err error) {
 
 	if httpClient == nil {
 		clearoutTimeoutMsec := config.GetClearoutTimeout()
@@ -62,7 +63,7 @@ func ClearoutInstantCheck(emailStr string) (requestSuccess bool, valid bool, err
 		return false, false, fmt.Errorf("failed to marshal request data: %s", err)
 	}
 
-	httpReq, err := http.NewRequest(http.MethodPost, apiUrl, bytes.NewBuffer(jsonBytes))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, apiUrl, bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		return false, false, fmt.Errorf("failed to create new HTTP request: %s", err)
 	}
