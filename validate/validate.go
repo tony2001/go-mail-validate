@@ -1,6 +1,7 @@
 package validate
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -32,7 +33,7 @@ const (
 	StateValid
 )
 
-func (v *ValidateFSM) Validate(emailStr string) (bool, []Result) {
+func (v *ValidateFSM) Validate(ctx context.Context, emailStr string) (bool, []Result) {
 
 	var (
 		err       error
@@ -83,7 +84,7 @@ FSM:
 			}
 		case StateMxRecord:
 			result.Name = "mxRecord"
-			result.Valid, err = v.validateDomainLookup(emailStr)
+			result.Valid, err = v.validateDomainLookup(ctx, emailStr)
 			if err != nil {
 				result.Reason = err.Error()
 				state = StateInvalid
@@ -92,7 +93,7 @@ FSM:
 			}
 		case StateSmtpTest:
 			result.Name = "smtpTest"
-			result.Valid, err = v.validateSmtpServer(emailStr)
+			result.Valid, err = v.validateSmtpServer(ctx, emailStr)
 			if err != nil {
 				result.Reason = err.Error()
 
@@ -111,7 +112,7 @@ FSM:
 			}
 		case StateClearout:
 			result.Name = "clearout"
-			result.Valid, err = v.validateClearout(emailStr)
+			result.Valid, err = v.validateClearout(ctx, emailStr)
 			if err != nil {
 				result.Reason = err.Error()
 				state = StateInvalid
@@ -181,12 +182,12 @@ func (v *ValidateFSM) validateReservedDomain(emailStr string) (bool, error) {
 	return true, nil
 }
 
-func (v *ValidateFSM) validateDomainLookup(emailStr string) (bool, error) {
+func (v *ValidateFSM) validateDomainLookup(ctx context.Context, emailStr string) (bool, error) {
 	if v.Email == nil {
 		return false, fmt.Errorf("unparsed email")
 	}
 
-	mxServer, err := lookupDomain(v.Email.Domain)
+	mxServer, err := lookupDomain(ctx, v.Email.Domain)
 	if err != nil {
 		return false, err
 	}
@@ -195,17 +196,17 @@ func (v *ValidateFSM) validateDomainLookup(emailStr string) (bool, error) {
 	return true, nil
 }
 
-func (v *ValidateFSM) validateSmtpServer(emailStr string) (bool, error) {
+func (v *ValidateFSM) validateSmtpServer(ctx context.Context, emailStr string) (bool, error) {
 	if v.MxServer == "" {
 		return false, fmt.Errorf("mx server not found")
 	}
 
-	valid, err := trySmtp(v.MxServer, v.Email.Local, v.Email.Domain, false)
+	valid, err := trySmtp(ctx, v.MxServer, v.Email.Local, v.Email.Domain, false)
 	return valid, err
 }
 
-func (v *ValidateFSM) validateClearout(emailStr string) (bool, error) {
-	result, valid, err := ClearoutInstantCheck(emailStr)
+func (v *ValidateFSM) validateClearout(ctx context.Context, emailStr string) (bool, error) {
+	result, valid, err := ClearoutInstantCheck(ctx, emailStr)
 	if !result {
 		//query error
 		if err != nil {

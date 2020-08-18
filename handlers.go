@@ -61,7 +61,7 @@ func handleEmailValidate(w http.ResponseWriter, r *http.Request) {
 
 	fsm := &validate.ValidateFSM{}
 
-	valid, results := fsm.Validate(reqEmail.Email)
+	valid, results := fsm.Validate(r.Context(), reqEmail.Email)
 
 	response := NewResponse(valid, results)
 	sendJsonResponse(w, response)
